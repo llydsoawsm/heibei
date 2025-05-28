@@ -2,6 +2,9 @@
 # exit on error
 set -o errexit
 
+# Specify Python version
+export PYTHON_VERSION=3.11.8
+
 # Install dependencies
 pip install -r requirements.txt
 
