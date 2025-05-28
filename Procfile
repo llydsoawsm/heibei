@@ -1,0 +1,1 @@
+web: gunicorn heibei_django.wsgi:application 

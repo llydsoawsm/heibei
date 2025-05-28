@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HeiBei AI Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #1a1b26;
+            --bg-secondary: #24283b;
+            --text-primary: #a9b1d6;
+            --text-secondary: #7aa2f7;
+            --accent: #7aa2f7;
+            --message-ai: #1a1b26;
+            --message-user: #2f334d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .landing-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: var(--bg-primary);
+            z-index: 1000;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .landing-page.hidden {
+            transform: translateY(-100%);
+        }
+
+        .landing-content {
+            text-align: center;
+            padding: 2rem;
+            max-width: 600px;
+        }
+
+        .start-button {
+            margin-top: 2rem;
+            padding: 1rem 2.5rem;
+            font-size: 1.2rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s ease forwards;
+            animation-delay: 2.5s;
+        }
+
+        .start-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .container {
+            width: 100%;
+            margin: 0 auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .container.visible {
+            opacity: 1;
+        }
+
+        .welcome-title {
+            font-size: 3.5rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            min-height: 4rem;
+        }
+
+        .welcome-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s ease forwards;
+            animation-delay: 2s;
+            margin-bottom: 1rem;
+        }
+
+        .chat-container {
+            background: var(--bg-secondary);
+            border-radius: 1rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            width: 95%;
+            max-width: 1200px;
+            height: 90vh;
+            margin: 2rem auto;
+        }
+
+        .chat-header {
+            background: var(--bg-primary);
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
+        }
+
+        .chat-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .message {
+            padding: 1.2rem;
+            border-radius: 0.75rem;
+            max-width: 85%;
+            animation: fadeIn 0.3s ease;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .message.ai-message {
+            background: var(--message-ai);
+            margin-right: auto;
+            border-left: 4px solid var(--accent);
+        }
+
+        .message.user-message {
+            background: var(--message-user);
+            margin-left: auto;
+            border-right: 4px solid var(--accent);
+        }
+
+        .input-container {
+            padding: 1.5rem;
+            background: var(--bg-primary);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 1rem;
+            position: relative;
+            max-width: 100%;
+        }
+
+        #user-input {
+            flex-grow: 1;
+            padding: 1rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+            min-height: 50px;
+        }
+
+        #user-input:focus {
+            box-shadow: 0 0 0 2px var(--accent);
+        }
+
+        button {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 0.5rem;
+            background: var(--accent);
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            min-width: 100px;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .typing-cursor {
+            display: inline-block;
+            width: 3px;
+            height: 1em;
+            background: var(--accent);
+            margin-left: 4px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0.5rem;
+            }
+
+            .chat-container {
+                width: 100%;
+                height: 100vh;
+                margin: 0;
+                border-radius: 0;
+            }
+
+            .chat-messages {
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            .message {
+                max-width: 90%;
+                padding: 1rem;
+                font-size: 0.95rem;
+            }
+
+            .input-container {
+                padding: 1rem;
+            }
+
+            button {
+                padding: 1rem;
+                min-width: 80px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .welcome-title {
+                font-size: 2.5rem;
+            }
+
+            .welcome-subtitle {
+                font-size: 1rem;
+            }
+
+            .start-button {
+                padding: 0.8rem 2rem;
+                font-size: 1rem;
+            }
+
+            .chat-header h2 {
+                font-size: 1.2rem;
+            }
+
+            .message {
+                max-width: 95%;
+                font-size: 0.9rem;
+            }
+
+            #user-input {
+                padding: 0.8rem 1rem;
+                font-size: 0.9rem;
+                min-height: 45px;
+            }
+
+            button {
+                padding: 0.8rem;
+                font-size: 0.9rem;
+                min-width: 70px;
+            }
+        }
+
+        /* For larger screens */
+        @media (min-width: 1400px) {
+            .chat-container {
+                max-width: 1400px;
+                height: 85vh;
+            }
+
+            .message {
+                font-size: 1.1rem;
+            }
+
+            .chat-header h2 {
+                font-size: 1.8rem;
+            }
+
+            #user-input {
+                font-size: 1.1rem;
+            }
+
+            button {
+                font-size: 1.1rem;
+            }
+        }
+
+        /* For landscape mobile devices */
+        @media (max-height: 600px) and (orientation: landscape) {
+            .chat-container {
+                height: 100vh;
+            }
+
+            .chat-header {
+                padding: 0.8rem 1.5rem;
+            }
+
+            .chat-messages {
+                padding: 1rem;
+                gap: 0.8rem;
+            }
+
+            .message {
+                padding: 0.8rem;
+            }
+
+            .input-container {
+                padding: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="landing-page" id="landing-page">
+        <div class="landing-content">
+            <div class="welcome-title" id="typing-text"></div>
+            <p class="welcome-subtitle">Your intelligent AI companion, ready to assist you.</p>
+            <button class="start-button" id="start-button">Let's Get Started</button>
+        </div>
+    </div>
+
+    <div class="container" id="chat-container">
+        <div class="chat-container">
+            <div class="chat-header">
+                <h2>Chat Session</h2>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <div class="message ai-message">
+                    Hello! I'm HeiBei, your AI assistant. How can I help you today?
+                </div>
+            </div>
+            <form id="chat-form" class="input-container">
+                {% csrf_token %}
+                <div class="input-wrapper">
+                    <input type="text" id="user-input" placeholder="Type your message..." required>
+                    <button type="submit">Send</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Typing animation for welcome text
+        const text = "Welcome to HeiBei";
+        const typingText = document.getElementById('typing-text');
+        let charIndex = 0;
+
+        function typeText() {
+            if (charIndex < text.length) {
+                typingText.textContent = text.substring(0, charIndex + 1);
+                charIndex++;
+                setTimeout(typeText, 100);
+            } else {
+                // Add blinking cursor after typing
+                typingText.innerHTML = text + '<span class="typing-cursor"></span>';
+            }
+        }
+
+        // Start typing animation when page loads
+        window.onload = typeText;
+
+        // Handle transition to chat interface
+        document.getElementById('start-button').addEventListener('click', () => {
+            document.getElementById('landing-page').classList.add('hidden');
+            document.getElementById('chat-container').classList.add('visible');
+            // Auto-focus input field after transition
+            setTimeout(() => {
+                document.getElementById('user-input').focus();
+            }, 800);
+        });
+
+        // Chat functionality
+        document.getElementById('chat-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const input = document.getElementById('user-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            // Add user message to chat
+            addMessage(message, 'user-message');
+            input.value = '';
+
+            try {
+                const response = await fetch('/chat/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    addMessage(data.response, 'ai-message');
+                } else {
+                    addMessage('Sorry, I encountered an error. Please try again.', 'ai-message');
+                }
+            } catch (error) {
+                addMessage('Sorry, I encountered an error. Please try again.', 'ai-message');
+            }
+        });
+
+        function addMessage(text, className) {
+            const messagesDiv = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${className}`;
+            messageDiv.textContent = text;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+    </script>
+</body>
+</html> 
